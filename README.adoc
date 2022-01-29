@@ -1,0 +1,259 @@
+= CMake-SWIG Generator
+:toc:
+:toc-placement!:
+
+toc::[]
+
+# Introduction
+
+This repository implements a generator that can supply projects with modern https://cmake.org/[CMake] scripts 
+and http://www.swig.org[SWIG] to provide a c++ wrapper and package (at the moment only Python is supported, I might add Java).
+
+The generator utilizes python scripts to analyse project structure and to parse the c++ source and header files inside. Based on the collected information
+it then generates the CMakeLists.txt files inside the project. The script expects your project to follow a specific <<struct,structure>>.
+
+It is not likely that a CMake generator would fit the need of anyone but I hope it would give one some idea to implement a customized version.
+
+Let me know in the issues section if you find any errors/bugs.
+
+# Features
+
+* project versioning
+* optional library building
+* installing/packaging
+* c++ python wrappers using SWIG
+* c++ compiler versions (11/14/17)
+* https://www.qt.io/[Qt] support (in progress)
+
+# Requirements
+
+* CMake v3.22.1+
+* A c++ compiler (defaults to gcc)
+* make
+* python3 interpreter and libraries (see requirements.txt)
+
+# Setup on Ubuntu
+
+https://help.dreamhost.com/hc/en-us/articles/115000702772-Installing-a-custom-version-of-Python-3[installing python3]:
+
+navigate to a directory to download python3 package:
+----
+$ cd ~/python/
+wget https://www.python.org/ftp/python/3.6.9/Python-3.6.9/.tgz
+$ tar zxvf Python-3.6.9.tgz 
+$ cd Python-3.6.9 
+$ ./configure --prefix=$HOME/python/python-3.6.9
+$ make
+$ make install
+----
+Note: I used python3.6.9 but later versions might also work (I did not test it)
+
+navigate back to your home directory and update .bash_profile file with the following:
+----
+export PATH=$HOME/python/python-3.6.9/bin:$PATH
+----
+run the bash file to update PATH:
+----
+$ . ~/.bash_profile
+----
+check python3 location and version:
+----
+$ which python3
+/home/username/python/python-3.6.9/bin/python3
+$ python3 --version
+Python 3.6.9
+----
+
+setup https://help.dreamhost.com/hc/en-us/articles/115000695551-Installing-and-using-virtualenv-with-Python-3[virtualenv] for python3:
+----
+$ sudo apt-get update
+$ sudo apt-get install python3 python3-venv python3-pip
+$ python3 -m pip install --upgrade pip
+$ pip3 install virtualenv
+----
+
+navigate to a location where you would like to create the virtualenv:
+----
+$ cd ~/venvs
+$ virtualenv -p /home/username/python/python-3.6.9/bin/python3 myvenv
+----
+Note: you can add the location of the python interpeter with the p flag (the one we created) followed by the name of the virtualenv (myvenv)
+
+// activate your virtualenv and check the python interpreter it uses:
+----
+$ source myvenv/bin/activate
+(myvenv) $ python -V
+Python 3.6.9
+----
+you can deactivate your virtualenv:
+----
+(myvenv) $ deactivate
+----
+
+install packages from requirements.txt under root:
+----
+(myvenv) $ pip3 install requirements.txt
+----
+
+# How to Use
+
+[[struct]]
+## Expected Project Structure
+
+Your project should be outlined as follows:
+
+Place your project folders under root:
+----
+- root
+  - < your_project_folders >
+  - cmake
+  - python
+    - __init__.py
+    - cmake_module.py
+    - < python package(s) using C++ wrappers from < your_project_folders > >
+  - scripts
+    - create_cmake_options.py.in
+    - extra_libs.txt
+    - generate_cmake.py
+    - install.py.in
+----
+
+Your project folders can contain any number of projects at arbitrary locations. They should be structured as follows:
+
+----
+- project
+  - apps
+    - < executables: *.cpp >
+  - include
+    - < relative_path_from_root_project >
+      - < header files: *.h >
+  - src
+    - < source files: *.cpp >
+  - swig
+    - < interface files: *.i >
+  - external
+    - < arbitrary_external_library >
+----
+
+Place your external projects under a folder called external. Generator would not touch these directories. You have to link your external library to your targets by updating the generated CMakeLists.txt files by hand. Unfortunately, the content of an external library could be anything hence there is no easy way to integrate them to the project automatically.
+
+If you had a project at root/A/AA/AAA you would have your header files under root/A/AA/AAA/include/A/AA/AAA/. This ensures that includes are unique and there won't be any conflicts. Check out demo projects liba and libb for a detailed example or https://cliutils.gitlab.io/modern-cmake/chapters/basics/structure.html for more info.
+
+## Demo Project
+There are demo libraries liba and libb. liba can be built as a package and used from libb. You can use the default settings by running the bash files.
+
+create package and python wrapper for liba:
+----
+$ cd liba
+$ ./generate.sh
+$ ./configure.sh
+$ ./build.sh
+$ ./install.sh
+$ ./install-python.sh
+----
+
+run C++ executable:
+----
+$ ./run-exe.sh
+----
+
+run python-wrappers:
+----
+$ ./run-python.sh
+----
+
+test liba as a package from libb:
+----
+$ cd libb
+$ ./configure.sh
+$ ./build.sh
+$ ./build/main
+----
+
+## Custom Settings
+
+You can run the generator with the following options:
+
+`swig_python` adds SWIG content to CMake files. You can run ./install-python.sh after building the library to use the python wrappers
+
+`clean` removes all the generated files. All the other options are ignored
+
+`cpp_version` sets the C++ compiler version (11,14 or 17). Default is 17.
+
+For example, you can remove the generated files by running
+----
+$ python3 liba/scripts/generate_cmake.py --clean
+----
+
+You have additional cmake configuration flags `FORCE_BUILD` and `FORCE_NO_BUILD` to indicate the libraries you want/do not want to build. By default, all the libraries will be built. You can provide the relative path(s) to any folder under your project folders separated by ; in a string. By setting these flags you can change the default to build/to not build inside a directory.
+
+As an example, consider the following project structure:
+
+----
+- A
+  - B
+    - C - project_C
+    - D - project_D
+    - E - project_E
+    - F - project_F
+----
+
+The following CMake commands have the same effect as they only build project_C:
+----
+$ cmake -B build -S . -DFORCE_NO_BUILD:STRING="A" -DFORCE_BUILD:STRING="A/B/C"
+----
+
+----
+$ cmake -B build -S . -DFORCE_NO_BUILD:STRING="B" -DFORCE_BUILD:STRING="A/B/C"
+----
+
+----
+$ cmake -B build -S . -DFORCE_NO_BUILD:STRING="A/B/D;A/B/E;A/B/F"
+----
+
+Note: Option one is the preferred way when the number of projects under `A/B` is large
+
+The build options will be saved under `<path_to_root>/build/include/build_info.h`, `<path_to_root>/build/python/<project_name>_build/info.py` and `<install_prefix>/include/build_info.h` 
+to provide build information inside your library, to external python scripts and to downstream C++ libraries respectively. Their content would look like as follows for the example above:
+
+build_info.h under the build folder:
+----
+#define USE_A_B_C
+/* #undef USE_A_B_D */
+/* #undef USE_A_B_E */
+/* #undef USE_A_B_F */
+----
+
+build_info.h at the install location:
+----
+#define USE_<project_name>_A_B_C
+/* #undef USE_<project_name>_A_B_D */
+/* #undef USE_<project_name>_A_B_E */
+/* #undef USE_<project_name>_A_B_F */
+----
+
+info.py:
+----
+USE_<project_name>_A_B_C = True
+USE_<project_name>_A_B_D = False
+USE_<project_name>_A_B_E = False
+USE_<project_name>_A_B_F = False
+----
+
+The default install prefix on Ubuntu is `/usr/local/`. You can customize the install location as in the default setting by
+adding `-DCMAKE_INSTALL_PREFIX="<your_install_prefix>"` argument to the cmake command. You need to provide the same install prefix
+to downstream libraries (libb) so they can pick up the config files.
+
+There might be additional libraries that your project depends on which are not automatically linked by CMake (for example the cmath library given in the Demo project).
+You can provide these in scripts/extra_libs.txt (I have not figured out a way to automize this, you would need to map all of such includes
+to their corresponding library name)
+
+# References / Acknowledgements
+
+There are several CMake examples and tutorials on the web that helped me along my CMake journey. This repository mainly adopts ideas from the following resources: 
+
+  * https://cliutils.gitlab.io/modern-cmake/
+  * https://github.com/ttroy50/cmake-examples
+  * https://github.com/Mizux/cmake-swig
+  * https://github.com/forexample/package-example
+  * https://www.youtube.com/watch?v=nlKcXPUJGwA&list=PLalVdRk2RC6o5GHu618ARWh0VO0bFlif4

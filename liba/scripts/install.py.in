@@ -1,0 +1,60 @@
+import setuptools.command.install
+import shutil
+from distutils.sysconfig import get_python_lib
+from pathlib import Path
+
+import os
+
+class CompiledLibInstall(setuptools.command.install.install):
+    """
+    Specialized install to install to python libs
+    """
+
+    def create_module(self, path):
+        file_path = os.path.join(path, "__init__.py")
+        if not os.path.exists(file_path):
+            with open(file_path, 'w') as file: pass
+    
+    def create_modules(self, root):
+        self.create_module(root)
+        [ self.create_module(path.path) for path in os.scandir(root) if path.is_dir()]
+
+    def install(self, filename, install_dir, install_dir_tail):
+        install_path = os.path.join(install_dir, install_dir_tail)
+        os.makedirs(install_path, exist_ok = True)
+
+        module_root_path = os.path.join(install_dir, Path(install_dir_tail).parts[0])
+        # place __init__.py inside folders so they will be recognized as python modules
+        self.create_modules(module_root_path)
+
+        shutil.copy(filename, install_path)
+        print(f"file: {filename} has been installed to {install_path}")
+
+    def run(self):
+        """
+        Run method called by setup
+        :return:
+        """
+        # Get filenames from CMake variable
+        filenames = "${PYTHON_INSTALL_FILES}".split(';')
+        install_dir_tails = "${PYTHON_INSTALL_RPATHS}".split(';')
+        if len(filenames) == len(install_dir_tails):
+            # Directory to install to
+            install_dir = get_python_lib()
+
+            # Install files
+            [ self.install(filename, install_dir, install_dir_tail) for filename, install_dir_tail in zip(filenames, install_dir_tails)]
+        else:
+            print("Installing python modules has failed. The number of install paths and files do not match")
+
+
+if __name__ == '__main__':
+    setuptools.setup(
+        name='swig_install',
+        version='1.0.0-dev',
+        packages=['data_structure'],
+        license='Apache License 2.0',
+        author='David Sebok',
+        author_email='david.sebok389@gmail.com',
+        cmdclass={'install': CompiledLibInstall}
+    )

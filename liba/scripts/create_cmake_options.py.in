@@ -1,0 +1,155 @@
+import glob, os
+import re
+import inspect
+import textwrap
+import sys
+import traceback
+from itertools import groupby
+
+cmake_root = "@CMAKE_CURRENT_SOURCE_DIR@"
+build = "@FORCE_BUILD@".split(" ")
+no_build = "@FORCE_NO_BUILD@".split(" ")
+build = [path.replace('/', os.path.sep) for path in build] if build != [''] else []
+no_build = [path.replace('/', os.path.sep) for path in no_build] if no_build != [''] else []
+
+def determine_project_folders():
+    folders = {name for name in os.listdir(cmake_root) if os.path.isdir(os.path.join(cmake_root, name))}
+    hidden_folders = {os.path.basename(p) for p in glob.glob(os.path.join(cmake_root, ".*"))}
+    folders.discard("external")
+    folders.discard("build")
+    folders.discard("scripts")
+    folders.discard("python")
+    folders.discard("apps")
+    return list(folders - hidden_folders)
+
+subdirs = determine_project_folders()
+
+def get_lib_dirs():
+    lib_dirs = []
+    for dir in subdirs:
+        lib_dirs.extend([os.path.relpath(path, cmake_root)[:-8] 
+        for path in glob.glob(os.path.join(cmake_root, dir, "**", "include"), recursive=True)
+        if not os.path.sep + "external" + os.path.sep in path])
+    return lib_dirs
+
+option_dict = {}
+
+def path_to_macro(path):
+    return path.replace(os.path.sep, "_").upper()
+
+def buildTree(dirs):
+    tree = {}
+    for dir in dirs:
+        folders = dir.split(os.path.sep)
+        subtree = tree
+        for folder in folders:
+            if not folder in subtree:
+                subtree[folder] = {}
+            subtree = subtree[folder]
+    return tree
+
+def update_options(tree, path, value):
+    def update_options_helper(tree, rpath):
+        for folder in tree.keys():
+            curr_rpath = os.path.join(rpath, folder)
+            option_dict[path_to_macro(curr_rpath)] = value
+            # update child folders
+            if(tree[folder]):
+                update_options_helper(tree[folder], curr_rpath)
+
+    def navigate():
+        folders = path.split(os.path.sep)
+        subtree = tree
+        for folder in folders:
+            if folder in subtree:
+                subtree = subtree[folder]
+        return subtree
+
+    subtree = navigate()
+    if path:
+        option_dict[path_to_macro(path)] = value
+    update_options_helper(subtree, path)
+
+def update_parents(tree):
+    def update_parents_helper(tree, path):
+        if tree.keys():
+            child_options = [update_parents_helper(tree[k], os.path.join(path, k)) for k in tree.keys()]
+            # sanity check
+            parent_name = path_to_macro(path)
+            parent_option = any(child_options)
+            if parent_name:
+                if all(child_options) and not option_dict[parent_name]:
+                    raise Exception("Inconsistent parent-child build option setup.")
+                option_dict[parent_name] = parent_option
+
+            return parent_option
+        else:
+            # return leaf node option (library root)
+            return option_dict[path_to_macro(path)]
+    update_parents_helper(tree, "")
+
+def send_options_to_cmake():
+    message = []
+    for name, value in option_dict.items():
+        message.append(f"{name}:Option to build folder content:{value}")
+    print(";".join(message))
+
+def create_cmake_config(lib_dirs):
+    targets_export_names = ["_".join(lib_dir.upper().split(os.path.sep)) + "_Targets" for lib_dir in lib_dirs if \
+    option_dict[path_to_macro(lib_dir)]]
+    # @ONLY is set from cmake
+    content = "@PACKAGE_INIT" + "@\n"
+    # for name in targets_export_names:
+    #    content += f'include("${{CMAKE_CURRENT_LIST_DIR}}/{name}.cmake")\n'
+    content += f'include("${{CMAKE_CURRENT_LIST_DIR}}/@PROJECT_NAME' + '@_Targets.cmake")\n'
+    content += 'check_required_components("' + '@PROJECT_NAME@")'
+
+    with open(os.path.join(cmake_root, "cmake", "Config.cmake.in"), 'w') as f:
+        f.write(content)
+
+    # build info for python
+    os.makedirs(os.path.join(cmake_root, "build", "python", "@PROJECT_NAME@_build"), exist_ok=True)
+    with open(os.path.join(cmake_root, "build", "python", "@PROJECT_NAME@_build", "info.py"), 'w') as f:
+        content = ""
+        for lib_dir in lib_dirs:
+            macro = path_to_macro(lib_dir)
+            content += "USE_" + "@MAIN_PROJECT@_" + macro + " = "
+            content += "True\n" if option_dict[macro] else "False \n"
+        f.write(content)
+
+if __name__ == "__main__":
+
+    lib_dirs = get_lib_dirs()
+    tree = buildTree(lib_dirs)
+    # default build option is true
+    update_options(tree, "", True)
+
+    for path in build + no_build:
+        if not path_to_macro(path) in option_dict:
+            print(f"{path} does not exist.")
+            print("Check your FORCE_BUILD and FORCE_NO_BUILD arguments.")
+            sys.exit(1)
+
+    force = {k : set(v) for k, v in groupby(build, lambda x: len(x.split(os.path.sep)))}
+    skip = {k : set(v) for k, v in groupby(no_build, lambda x: len(x.split(os.path.sep)))}
+    try:
+        for k in sorted(list(force.keys()) + list(skip.keys())):
+            intersection = force.get(k, set()).intersection(skip.get(k, set()))
+            # conflict check
+            if intersection:
+                str = ", ".join(list(intersection))
+                raise Exception(f"Conflicting building option for the following directory: {str}")
+            else:
+                for path in force.get(k, []):
+                    update_options(tree, path, True)
+                
+                for path in skip.get(k, []):
+                    update_options(tree, path, False)
+        update_parents(tree)
+    except Exception as e:
+        print(e, "Check your FORCE_BUILD and FORCE_NO_BUILD arguments.")
+        sys.exit(1)
+
+    create_cmake_config(lib_dirs)
+
+    send_options_to_cmake()

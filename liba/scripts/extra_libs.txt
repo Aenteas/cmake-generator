@@ -1,0 +1,5 @@
+# extra libraries to link. For example math.h is inside libm, so we need to link it from CMake: 
+# target_link_libraries(<target> "m")
+# I have not figured out a way to automize it
+# list extra libs here. Format is <include path> <CMake library target>
+math.h m
