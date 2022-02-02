@@ -5,7 +5,7 @@ cmake_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 def has_ui_file(rpath):
     include_path = os.path.join(cmake_root, rpath, "include", rpath)
-    if os.path.exists():
+    if os.path.exists(include_path):
         return len([name for name in os.listdir(include_path) if name.endswith(".ui")]) > 0
     return False
 
