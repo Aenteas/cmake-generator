@@ -363,7 +363,7 @@ def link_contents(project_rpath):
         # and other libraries like qt
         # merge dependencies
         if use_qt and qt_deps["PUBLIC"] | qt_deps["PRIVATE"]:
-            qt_deps["PRIVATE"] |= "Qt5::Widgets"
+            qt_deps["PRIVATE"].add("Qt5::Widgets")
         extra_deps["PUBLIC"] |= qt_deps["PUBLIC"]
         extra_deps["PRIVATE"] |= qt_deps["PRIVATE"]
         if extra_deps:
@@ -715,9 +715,9 @@ def create_cmakelists(tree):
                     content = init_content(curr_rpath) + add_lib_content(curr_rpath)
                     if os.path.exists(os.path.join(cmake_root, curr_rpath, "apps")):
                         content += add_exe_content(curr_rpath)
-                    content += link_contents(curr_rpath)
                     if use_qt:
                         content += qt.add_qt_lib_content(curr_rpath)
+                    content += link_contents(curr_rpath)
                     if use_swig_python:
                         content += add_swig_content(curr_rpath)
                     f.write(content)

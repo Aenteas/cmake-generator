@@ -18,7 +18,7 @@ def find_package_content():
 def add_qt_lib_content(rpath):
     return inspect.cleandoc(f"""
     # create qt libraries
-    file(GLOB QTFILES "include/{rpath}//*.ui")
+    file(GLOB QTFILES "include/{rpath}/*.ui")
     foreach(QTFILE ${{QTFILES}})
       cmake_path(GET QTFILE STEM NAME)
       add_library(ui_{{NAME}} apps/${{NAME}}.ui)
