@@ -244,9 +244,13 @@ The default install prefix on Ubuntu is `/usr/local/`. You can customize the ins
 adding `-DCMAKE_INSTALL_PREFIX="<your_install_prefix>"` argument to the cmake command. You need to provide the same install prefix
 to downstream libraries (libb) so they can pick up the config files.
 
+## Includes
+
 There might be additional libraries that your project depends on which are not automatically linked by CMake (for example the cmath library given in the Demo project).
 You can provide these in scripts/extra_libs.txt (I have not figured out a way to automize this, you would need to map all of such includes
 to their corresponding library name)
+
+Important: You should include your own libraries with #include "filename" and use #include <filename> for standard and other external libraries
 
 # References / Acknowledgements
 
