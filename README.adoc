@@ -12,9 +12,10 @@ and http://www.swig.org[SWIG] to provide a c++ wrapper and package (at the momen
 The generator utilizes python scripts to analyse project structure and to parse the c++ source and header files inside. Based on the collected information
 it then generates the CMakeLists.txt files inside the project. The script expects your project to follow a specific <<struct,structure>>.
 
-It is not likely that a CMake generator would fit the need of anyone but I hope it would give one some idea to implement a customized version.
+## Why?
 
-Let me know in the issues section if you find any errors/bugs.
+I needed a script that generates python wrappers for my C++ projects. It is not likely that a CMake generator would fit the need of anyone but I tried to make
+it as general as possible so you can tailor the generated CMake files/implementation to your own needs.
 
 # Features
 
