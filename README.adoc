@@ -14,8 +14,8 @@ it then generates the CMakeLists.txt files inside the project. The script expect
 
 ## Why?
 
-I needed a script that generates python wrappers for my C++ projects. It is not likely that a CMake generator would fit the need of anyone but I tried to make
-it as general as possible so you can tailor the generated CMake files/implementation to your own needs.
+I needed a script that generates python wrappers for my C++ projects. 
+It is not likely that a CMake generator would fit the need of anyone but you can tailor the generated files/implementation to your own needs.
 
 # Features
 
@@ -24,7 +24,7 @@ it as general as possible so you can tailor the generated CMake files/implementa
 * installing/packaging
 * c++ python wrappers using SWIG
 * c++ compiler versions (11/14/17)
-* https://www.qt.io/[Qt] support (in progress)
+* https://www.qt.io/[Qt] support
 
 # Requirements
 
@@ -128,6 +128,7 @@ Your project folders can contain any number of projects at arbitrary locations. 
   - include
     - < relative_path_from_root_project >
       - < header files: *.h >
+      - < Qt ui files: *.h >
   - src
     - < source files: *.cpp >
   - swig
@@ -178,6 +179,8 @@ You can run the generator with the following options:
 `swig_python` adds SWIG content to CMake files. You can run ./install-python.sh after building the library to use the python wrappers
 
 `clean` removes all the generated files. All the other options are ignored
+
+`qt` add Qt support to the generated files. (Only ui files are supported)
 
 `cpp_version` sets the C++ compiler version (11,14 or 17). Default is 17.
 
@@ -245,6 +248,10 @@ The default install prefix on Ubuntu is `/usr/local/`. You can customize the ins
 adding `-DCMAKE_INSTALL_PREFIX="<your_install_prefix>"` argument to the cmake command. You need to provide the same install prefix
 to downstream libraries (libb) so they can pick up the config files.
 
+## Qt
+
+You need to tell cmake where to find Qt by providing `-DCMAKE_PREFIX_PATH="path/to/Qt5/lib/cmake"` as an argument.
+
 ## Includes
 
 There might be additional libraries that your project depends on which are not automatically linked by CMake (for example the cmath library given in the Demo project).
@@ -261,4 +268,5 @@ There are several CMake examples and tutorials on the web that helped me along m
   * https://github.com/ttroy50/cmake-examples
   * https://github.com/Mizux/cmake-swig
   * https://github.com/forexample/package-example
+  * https://github.com/jasondegraw/Qt-CMake-HelloWorld
   * https://www.youtube.com/watch?v=nlKcXPUJGwA&list=PLalVdRk2RC6o5GHu618ARWh0VO0bFlif4
