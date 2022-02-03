@@ -1,5 +1,5 @@
 import sys
-import CppHeaderParser
+import parse_includes
 import glob, os
 import re
 import inspect
@@ -334,13 +334,13 @@ def link_contents(project_rpath):
 
     def extract_includes(rpath, name, is_header = True):
         
-        cppHeader = CppHeaderParser.CppHeader(get_path(rpath, name, is_header))
+        includes = parse_includes.find_includes(get_path(rpath, name, is_header))
 
         # include "path_to_header/header_name.h" -> path_to_header/header_name
         regex = '.*".*".*'
         user_includes = set()
         qt_includes = set()
-        for incl in cppHeader.includes:
+        for incl in includes:
             if not re.search(regex, incl) is None:
                 name = incl.split('"')[1][:-2]
                 if use_qt and incl.split('"')[1].startswith("ui_"):
@@ -352,7 +352,7 @@ def link_contents(project_rpath):
                     user_includes.add(name)
 
         regex = '.*<.*>.*'
-        extra_includes = {incl.split('<')[-1].split('>')[0][:-2] for incl in cppHeader.includes 
+        extra_includes = {incl.split('<')[-1].split('>')[0][:-2] for incl in includes 
         if not re.search(regex, incl) is None and incl.split('<')[-1].split('>')[0][:-2] in extra_links}
 
         return (user_includes, extra_includes, qt_includes)
@@ -738,4 +738,5 @@ if __name__ == "__main__":
         create_cmakelists(tree)
 
         print("Generation has been completed.")
+
 

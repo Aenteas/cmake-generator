@@ -1,3 +1,0 @@
-/home/david/projects/cmake_generator/libb/build/CMakeFiles/main.dir
-/home/david/projects/cmake_generator/libb/build/CMakeFiles/edit_cache.dir
-/home/david/projects/cmake_generator/libb/build/CMakeFiles/rebuild_cache.dir
