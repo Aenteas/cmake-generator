@@ -3,3 +3,6 @@
 # I have not figured out a way to automize it
 # list extra libs here. Format is <include path> <CMake library target>
 math.h m
+QColor Qt5::Gui
+QFrame Qt5::Widgets
+QTime Qt5::Core

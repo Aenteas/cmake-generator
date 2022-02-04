@@ -24,7 +24,7 @@ It is not likely that a CMake generator would fit the need of anyone but you can
 * installing/packaging
 * c++ python wrappers using SWIG
 * c++ compiler versions (11/14/17)
-* https://www.qt.io/[Qt] support
+* https://www.qt.io/[Qt5] support
 
 # Requirements
 
@@ -128,7 +128,6 @@ Your project folders can contain any number of projects at arbitrary locations. 
   - include
     - < relative_path_from_root_project >
       - < header files: *.h >
-      - < Qt ui files: *.h >
   - src
     - < source files: *.cpp >
   - swig
@@ -250,13 +249,18 @@ to downstream libraries (libb) so they can pick up the config files.
 
 ## Qt
 
-You need to tell cmake where to find Qt by providing `-DCMAKE_PREFIX_PATH="path/to/Qt5/lib/cmake"` as an argument.
+You need to place the source and corresponding ui files under the same directory (under apps or source folder). Ui files by design are supposed to be linked
+privately to a single source file. There is a Qt-cmake bug that won't let you do it otherwise https://gitlab.kitware.com/cmake/cmake/-/issues/17456.
 
 ## Includes
 
 There might be additional libraries that your project depends on which are not automatically linked by CMake (for example the cmath library given in the Demo project).
 You can provide these in scripts/extra_libs.txt (I have not figured out a way to automize this, you would need to map all of such includes
-to their corresponding library name)
+to their corresponding library name). 
+
+You also need to declare Qt includes and corresponding Qt components in scripts/extra_libs.txt. For example, if you have a file
+that includes QColor, you can look it up that it is under the Gui component of Qt so you would declare QColor Qt5::Gui to link it (thats all you need to do,
+everything else is taken care by the script).
 
 Important: You should include your own libraries with #include "filename" and use #include <filename> for standard and other external libraries
 
