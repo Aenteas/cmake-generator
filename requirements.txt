@@ -1,2 +1,1 @@
-CppHeaderParser==2.7.4
-ply==3.11
+

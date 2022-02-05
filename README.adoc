@@ -12,6 +12,8 @@ and http://www.swig.org[SWIG] to provide a c++ wrapper and package (at the momen
 The generator utilizes python scripts to analyse project structure and to parse the c++ source and header files inside. Based on the collected information
 it then generates the CMakeLists.txt files inside the project. The script expects your project to follow a specific <<struct,structure>>.
 
+For a more complex project example visit: https://github.com/Aenteas/MCTS.
+
 ## Why?
 
 I needed a script that generates python wrappers for my C++ projects. 
@@ -89,11 +91,6 @@ Python 3.6.9
 you can deactivate your virtualenv:
 ----
 (myvenv) $ deactivate
-----
-
-install packages from requirements.txt under root:
-----
-(myvenv) $ pip3 install requirements.txt
 ----
 
 # How to Use
