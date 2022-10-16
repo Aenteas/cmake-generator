@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<!-- saved from url=(0081)https://nadiah.org/2020/03/01/example-debug-mixed-python-c-in-visual-studio-code/ -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Example debugging mixed Python C++ in VS Code | Nadiah Kristensen</title>
+<meta name="generator" content="Jekyll v3.9.2">
+<meta property="og:title" content="Example debugging mixed Python C++ in VS Code">
+<meta name="author" content="nadiahkristensen">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="Visual Studio Code has the ability to debug mixed Python with C++ extensions. In this blog post, I give an example of how to get it working.">
+<meta property="og:description" content="Visual Studio Code has the ability to debug mixed Python with C++ extensions. In this blog post, I give an example of how to get it working.">
+<link rel="canonical" href="https://nadiah.org/2020/03/01/example-debug-mixed-python-c-in-visual-studio-code/">
+<meta property="og:url" content="https://nadiah.org/2020/03/01/example-debug-mixed-python-c-in-visual-studio-code/">
+<meta property="og:site_name" content="Nadiah Kristensen">
+<meta property="og:image" content="https://nadiah.org/wp-content/uploads/2020/02/inside_cpp_new.png">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2020-03-01T06:38:00+00:00">
+<meta name="twitter:card" content="summary_large_image">
+<meta property="twitter:image" content="https://nadiah.org/wp-content/uploads/2020/02/inside_cpp_new.png">
+<meta property="twitter:title" content="Example debugging mixed Python C++ in VS Code">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"nadiahkristensen"},"dateModified":"2020-03-01T06:38:00+00:00","datePublished":"2020-03-01T06:38:00+00:00","description":"Visual Studio Code has the ability to debug mixed Python with C++ extensions. In this blog post, I give an example of how to get it working.","headline":"Example debugging mixed Python C++ in VS Code","image":"https://nadiah.org/wp-content/uploads/2020/02/inside_cpp_new.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://nadiah.org/2020/03/01/example-debug-mixed-python-c-in-visual-studio-code/"},"url":"https://nadiah.org/2020/03/01/example-debug-mixed-python-c-in-visual-studio-code/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="./Example debugging mixed Python C++ in VS Code _ Nadiah Kristensen_files/main.css"><link type="application/atom+xml" rel="alternate" href="https://nadiah.org/feed.xml" title="Nadiah Kristensen"><style type="text/css">.CtxtMenu_InfoClose {  top:.2em; right:.2em;}
+.CtxtMenu_InfoContent {  overflow:auto; text-align:left; font-size:80%;  padding:.4em .6em; border:1px inset; margin:1em 0px;  max-height:20em; max-width:30em; background-color:#EEEEEE;  white-space:normal;}
+.CtxtMenu_Info.CtxtMenu_MousePost {outline:none;}
+.CtxtMenu_Info {  position:fixed; left:50%; width:auto; text-align:center;  border:3px outset; padding:1em 2em; background-color:#DDDDDD;  color:black;  cursor:default; font-family:message-box; font-size:120%;  font-style:normal; text-indent:0; text-transform:none;  line-height:normal; letter-spacing:normal; word-spacing:normal;  word-wrap:normal; white-space:nowrap; float:none; z-index:201;  border-radius: 15px;                     /* Opera 10.5 and IE9 */  -webkit-border-radius:15px;               /* Safari and Chrome */  -moz-border-radius:15px;                  /* Firefox */  -khtml-border-radius:15px;                /* Konqueror */  box-shadow:0px 10px 20px #808080;         /* Opera 10.5 and IE9 */  -webkit-box-shadow:0px 10px 20px #808080; /* Safari 3 & Chrome */  -moz-box-shadow:0px 10px 20px #808080;    /* Forefox 3.5 */  -khtml-box-shadow:0px 10px 20px #808080;  /* Konqueror */  filter:progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color="gray", Positive="true"); /* IE */}
+</style><style type="text/css">.CtxtMenu_MenuClose {  position:absolute;  cursor:pointer;  display:inline-block;  border:2px solid #AAA;  border-radius:18px;  -webkit-border-radius: 18px;             /* Safari and Chrome */  -moz-border-radius: 18px;                /* Firefox */  -khtml-border-radius: 18px;              /* Konqueror */  font-family: "Courier New", Courier;  font-size:24px;  color:#F0F0F0}
+.CtxtMenu_MenuClose span {  display:block; background-color:#AAA; border:1.5px solid;  border-radius:18px;  -webkit-border-radius: 18px;             /* Safari and Chrome */  -moz-border-radius: 18px;                /* Firefox */  -khtml-border-radius: 18px;              /* Konqueror */  line-height:0;  padding:8px 0 6px     /* may need to be browser-specific */}
+.CtxtMenu_MenuClose:hover {  color:white!important;  border:2px solid #CCC!important}
+.CtxtMenu_MenuClose:hover span {  background-color:#CCC!important}
+.CtxtMenu_MenuClose:hover:focus {  outline:none}
+</style><style type="text/css">.CtxtMenu_Menu {  position:absolute;  background-color:white;  color:black;  width:auto; padding:5px 0px;  border:1px solid #CCCCCC; margin:0; cursor:default;  font: menu; text-align:left; text-indent:0; text-transform:none;  line-height:normal; letter-spacing:normal; word-spacing:normal;  word-wrap:normal; white-space:nowrap; float:none; z-index:201;  border-radius: 5px;                     /* Opera 10.5 and IE9 */  -webkit-border-radius: 5px;             /* Safari and Chrome */  -moz-border-radius: 5px;                /* Firefox */  -khtml-border-radius: 5px;              /* Konqueror */  box-shadow:0px 10px 20px #808080;         /* Opera 10.5 and IE9 */  -webkit-box-shadow:0px 10px 20px #808080; /* Safari 3 & Chrome */  -moz-box-shadow:0px 10px 20px #808080;    /* Forefox 3.5 */  -khtml-box-shadow:0px 10px 20px #808080;  /* Konqueror */}
+.CtxtMenu_MenuItem {  padding: 1px 2em;  background:transparent;}
+.CtxtMenu_MenuArrow {  position:absolute; right:.5em; padding-top:.25em; color:#666666;  font-family: null; font-size: .75em}
+.CtxtMenu_MenuActive .CtxtMenu_MenuArrow {color:white}
+.CtxtMenu_MenuArrow.CtxtMenu_RTL {left:.5em; right:auto}
+.CtxtMenu_MenuCheck {  position:absolute; left:.7em;  font-family: null}
+.CtxtMenu_MenuCheck.CtxtMenu_RTL { right:.7em; left:auto }
+.CtxtMenu_MenuRadioCheck {  position:absolute; left: .7em;}
+.CtxtMenu_MenuRadioCheck.CtxtMenu_RTL {  right: .7em; left:auto}
+.CtxtMenu_MenuInputBox {  padding-left: 1em; right:.5em; color:#666666;  font-family: null;}
+.CtxtMenu_MenuInputBox.CtxtMenu_RTL {  left: .1em;}
+.CtxtMenu_MenuComboBox {  left:.1em; padding-bottom:.5em;}
+.CtxtMenu_MenuSlider {  left: .1em;}
+.CtxtMenu_SliderValue {  position:absolute; right:.1em; padding-top:.25em; color:#333333;  font-size: .75em}
+.CtxtMenu_SliderBar {  outline: none; background: #d3d3d3}
+.CtxtMenu_MenuLabel {  padding: 1px 2em 3px 1.33em;  font-style:italic}
+.CtxtMenu_MenuRule {  border-top: 1px solid #DDDDDD;  margin: 4px 3px;}
+.CtxtMenu_MenuDisabled {  color:GrayText}
+.CtxtMenu_MenuActive {  background-color: #606872;  color: white;}
+.CtxtMenu_MenuDisabled:focus {  background-color: #E8E8E8}
+.CtxtMenu_MenuLabel:focus {  background-color: #E8E8E8}
+.CtxtMenu_ContextMenu:focus {  outline:none}
+.CtxtMenu_ContextMenu .CtxtMenu_MenuItem:focus {  outline:none}
+.CtxtMenu_SelectionMenu {  position:relative; float:left;  border-bottom: none; -webkit-box-shadow:none; -webkit-border-radius:0px; }
+.CtxtMenu_SelectionItem {  padding-right: 1em;}
+.CtxtMenu_Selection {  right: 40%; width:50%; }
+.CtxtMenu_SelectionBox {  padding: 0em; max-height:20em; max-width: none;  background-color:#FFFFFF;}
+.CtxtMenu_SelectionDivider {  clear: both; border-top: 2px solid #000000;}
+.CtxtMenu_Menu .CtxtMenu_MenuClose {  top:-10px; left:-10px}
+</style><style id="MJX-CHTML-styles">
+mjx-container[jax="CHTML"] {
+  line-height: 0;
+}
+
+mjx-container [space="1"] {
+  margin-left: .111em;
+}
+
+mjx-container [space="2"] {
+  margin-left: .167em;
+}
+
+mjx-container [space="3"] {
+  margin-left: .222em;
+}
+
+mjx-container [space="4"] {
+  margin-left: .278em;
+}
+
+mjx-container [space="5"] {
+  margin-left: .333em;
+}
+
+mjx-container [rspace="1"] {
+  margin-right: .111em;
+}
+
+mjx-container [rspace="2"] {
+  margin-right: .167em;
+}
+
+mjx-container [rspace="3"] {
+  margin-right: .222em;
+}
+
+mjx-container [rspace="4"] {
+  margin-right: .278em;
+}
+
+mjx-container [rspace="5"] {
+  margin-right: .333em;
+}
+
+mjx-container [size="s"] {
+  font-size: 70.7%;
+}
+
+mjx-container [size="ss"] {
+  font-size: 50%;
+}
+
+mjx-container [size="Tn"] {
+  font-size: 60%;
+}
+
+mjx-container [size="sm"] {
+  font-size: 85%;
+}
+
+mjx-container [size="lg"] {
+  font-size: 120%;
+}
+
+mjx-container [size="Lg"] {
+  font-size: 144%;
+}
+
+mjx-container [size="LG"] {
+  font-size: 173%;
+}
+
+mjx-container [size="hg"] {
+  font-size: 207%;
+}
+
+mjx-container [size="HG"] {
+  font-size: 249%;
+}
+
+mjx-container [width="full"] {
+  width: 100%;
+}
+
+mjx-box {
+  display: inline-block;
+}
+
+mjx-block {
+  display: block;
+}
+
+mjx-itable {
+  display: inline-table;
+}
+
+mjx-row {
+  display: table-row;
+}
+
+mjx-row > * {
+  display: table-cell;
+}
+
+mjx-mtext {
+  display: inline-block;
+}
+
+mjx-mstyle {
+  display: inline-block;
+}
+
+mjx-merror {
+  display: inline-block;
+  color: red;
+  background-color: yellow;
+}
+
+mjx-mphantom {
+  visibility: hidden;
+}
+
+_::-webkit-full-page-media, _:future, :root mjx-container {
+  will-change: opacity;
+}
+
+mjx-assistive-mml {
+  position: absolute !important;
+  top: 0px;
+  left: 0px;
+  clip: rect(1px, 1px, 1px, 1px);
+  padding: 1px 0px 0px 0px !important;
+  border: 0px !important;
+  display: block !important;
+  width: auto !important;
+  overflow: hidden !important;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+mjx-assistive-mml[display="block"] {
+  width: 100% !important;
+}
+
+mjx-c::before {
+  display: block;
+  width: 0;
+}
+
+.MJX-TEX {
+  font-family: MJXZERO, MJXTEX;
+}
+
+.TEX-B {
+  font-family: MJXZERO, MJXTEX-B;
+}
+
+.TEX-I {
+  font-family: MJXZERO, MJXTEX-I;
+}
+
+.TEX-MI {
+  font-family: MJXZERO, MJXTEX-MI;
+}
+
+.TEX-BI {
+  font-family: MJXZERO, MJXTEX-BI;
+}
+
+.TEX-S1 {
+  font-family: MJXZERO, MJXTEX-S1;
+}
+
+.TEX-S2 {
+  font-family: MJXZERO, MJXTEX-S2;
+}
+
+.TEX-S3 {
+  font-family: MJXZERO, MJXTEX-S3;
+}
+
+.TEX-S4 {
+  font-family: MJXZERO, MJXTEX-S4;
+}
+
+.TEX-A {
+  font-family: MJXZERO, MJXTEX-A;
+}
+
+.TEX-C {
+  font-family: MJXZERO, MJXTEX-C;
+}
+
+.TEX-CB {
+  font-family: MJXZERO, MJXTEX-CB;
+}
+
+.TEX-FR {
+  font-family: MJXZERO, MJXTEX-FR;
+}
+
+.TEX-FRB {
+  font-family: MJXZERO, MJXTEX-FRB;
+}
+
+.TEX-SS {
+  font-family: MJXZERO, MJXTEX-SS;
+}
+
+.TEX-SSB {
+  font-family: MJXZERO, MJXTEX-SSB;
+}
+
+.TEX-SSI {
+  font-family: MJXZERO, MJXTEX-SSI;
+}
+
+.TEX-SC {
+  font-family: MJXZERO, MJXTEX-SC;
+}
+
+.TEX-T {
+  font-family: MJXZERO, MJXTEX-T;
+}
+
+.TEX-V {
+  font-family: MJXZERO, MJXTEX-V;
+}
+
+.TEX-VB {
+  font-family: MJXZERO, MJXTEX-VB;
+}
+
+mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
+  font-family: MJXZERO, MJXTEX-S1, MJXTEX-S4, MJXTEX, MJXTEX-A ! important;
+}
+
+@font-face /* 0 */ {
+  font-family: MJXZERO;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Zero.woff") format("woff");
+}
+
+@font-face /* 1 */ {
+  font-family: MJXTEX;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Main-Regular.woff") format("woff");
+}
+
+@font-face /* 2 */ {
+  font-family: MJXTEX-B;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Main-Bold.woff") format("woff");
+}
+
+@font-face /* 3 */ {
+  font-family: MJXTEX-I;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Math-Italic.woff") format("woff");
+}
+
+@font-face /* 4 */ {
+  font-family: MJXTEX-MI;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Main-Italic.woff") format("woff");
+}
+
+@font-face /* 5 */ {
+  font-family: MJXTEX-BI;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Math-BoldItalic.woff") format("woff");
+}
+
+@font-face /* 6 */ {
+  font-family: MJXTEX-S1;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Size1-Regular.woff") format("woff");
+}
+
+@font-face /* 7 */ {
+  font-family: MJXTEX-S2;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Size2-Regular.woff") format("woff");
+}
+
+@font-face /* 8 */ {
+  font-family: MJXTEX-S3;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Size3-Regular.woff") format("woff");
+}
+
+@font-face /* 9 */ {
+  font-family: MJXTEX-S4;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Size4-Regular.woff") format("woff");
+}
+
+@font-face /* 10 */ {
+  font-family: MJXTEX-A;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_AMS-Regular.woff") format("woff");
+}
+
+@font-face /* 11 */ {
+  font-family: MJXTEX-C;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Calligraphic-Regular.woff") format("woff");
+}
+
+@font-face /* 12 */ {
+  font-family: MJXTEX-CB;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Calligraphic-Bold.woff") format("woff");
+}
+
+@font-face /* 13 */ {
+  font-family: MJXTEX-FR;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Fraktur-Regular.woff") format("woff");
+}
+
+@font-face /* 14 */ {
+  font-family: MJXTEX-FRB;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Fraktur-Bold.woff") format("woff");
+}
+
+@font-face /* 15 */ {
+  font-family: MJXTEX-SS;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_SansSerif-Regular.woff") format("woff");
+}
+
+@font-face /* 16 */ {
+  font-family: MJXTEX-SSB;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_SansSerif-Bold.woff") format("woff");
+}
+
+@font-face /* 17 */ {
+  font-family: MJXTEX-SSI;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_SansSerif-Italic.woff") format("woff");
+}
+
+@font-face /* 18 */ {
+  font-family: MJXTEX-SC;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Script-Regular.woff") format("woff");
+}
+
+@font-face /* 19 */ {
+  font-family: MJXTEX-T;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Typewriter-Regular.woff") format("woff");
+}
+
+@font-face /* 20 */ {
+  font-family: MJXTEX-V;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Vector-Regular.woff") format("woff");
+}
+
+@font-face /* 21 */ {
+  font-family: MJXTEX-VB;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Vector-Bold.woff") format("woff");
+}
+</style></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="https://nadiah.org/">Nadiah Kristensen</a>
+    <span style="font-size: 16px; line-height: 60px; margin-bottom: 0; margin-left: 20px; float: left;"><a href="https://github.com/nadiahpk"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg></a><a href="https://www.twitter.com/NadiahKrist"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg></a></span><nav style="z-index: 9999;" class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger">
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="https://nadiah.org/about.html">About me</a><a class="page-link" href="https://nadiah.org/contact.html">Contact</a><a class="page-link" href="https://nadiah.org/papers.html">Papers</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope="" itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Example debugging mixed Python C++ in VS Code</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2020-03-01T06:38:00+00:00" itemprop="datePublished">Mar 1, 2020
+      </time>• <span itemprop="author" itemscope="" itemtype="http://schema.org/Person"><span class="p-author h-card" itemprop="name">nadiahkristensen</span></span>, Filed under:
+        
+            <a href="https://nadiah.org/category/coding">#coding</a>
+        </p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>Visual Studio Code has the ability to debug mixed Python with C++
+extensions. In this blog post, I give an example of how to get
+it working.</p>
+
+<p>I’m going to do the example from scratch in five steps:</p>
+
+<ol>
+  <li><strong>Make virtual environment</strong>. Chances are that, if you’re doing this kind of thing, you’ll be wanting to use a virtual environment too.</li>
+  <li><strong>Write code</strong>. My toy example is a C++ extension that just adds two numbers together.</li>
+  <li><strong>Set up VS Code project</strong>. Important to point the interpreter to virtual environment.</li>
+  <li><strong>Create <code class="language-plaintext highlighter-rouge">launch.json</code></strong>. Configure the debugger so it can both run on python launch and attach to C++.</li>
+  <li><strong>Run two debuggers at once</strong>. How to pause the debugger and switch from python to C++ (with screenshots).</li>
+</ol>
+
+<h4 id="step-1-make-virtual-environment">Step 1. Make virtual environment</h4>
+
+<figure class="highlight"><pre><code class="language-shell_session" data-lang="shell_session"><span class="gp">$</span><span class="w"> </span>virtualenv <span class="nt">--python</span><span class="o">=</span>python3.6 myadd
+<span class="go">Running virtualenv with interpreter /usr/bin/python3.6 ...
+
+</span><span class="gp">$</span><span class="w"> </span><span class="nb">cd </span>myadd/
+<span class="go">
+</span><span class="gp">$</span><span class="w"> </span><span class="nb">ls</span>
+<span class="go">bin  include  lib  share</span></code></pre></figure>
+
+<p>Activating the environment changes the prompt as a reminder</p>
+
+<figure class="highlight"><pre><code class="language-shell_session" data-lang="shell_session"><span class="gp">$</span><span class="w"> </span><span class="nb">.</span> bin/activate
+<span class="gp">(myadd) $</span></code></pre></figure>
+
+<p>I’ll be working from within the virtual environment from here on.</p>
+
+<h4 id="step-2-write-example-code">Step 2. Write example code</h4>
+
+<p>Write the C++ extension.</p>
+
+<figure class="highlight"><pre><code class="language-shell_session" data-lang="shell_session"><span class="gp">(myadd) $</span><span class="w"> </span>vim myadd.cpp</code></pre></figure>
+
+<p>Inside <code class="language-plaintext highlighter-rouge">myadd.cpp</code>:</p>
+
+<figure class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="cp">#include &lt;Python.h&gt;
+</span>
+<span class="k">static</span> <span class="n">PyObject</span> <span class="o">*</span><span class="nf">method_myadd</span><span class="p">(</span><span class="n">PyObject</span> <span class="o">*</span><span class="n">self</span><span class="p">,</span> <span class="n">PyObject</span> <span class="o">*</span><span class="n">args</span><span class="p">){</span>
+    <span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+
+    <span class="cm">/* Parse arguments */</span>
+    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">PyArg_ParseTuple</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="s">"ii"</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">y</span><span class="p">)){</span>
+            <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="cm">/* The actual bit of code I need */</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">;</span>
+
+    <span class="k">return</span> <span class="n">PyLong_FromLong</span><span class="p">(</span><span class="n">z</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">PyMethodDef</span> <span class="n">myaddMethods</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="p">{</span><span class="s">"myadd"</span><span class="p">,</span> <span class="n">method_myadd</span><span class="p">,</span> <span class="n">METH_VARARGS</span><span class="p">,</span> <span class="s">"Python interface for myadd C library function"</span><span class="p">},</span>
+    <span class="p">{</span><span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">}</span>
+<span class="p">};</span>
+
+<span class="k">static</span> <span class="k">struct</span> <span class="nc">PyModuleDef</span> <span class="n">myaddmodule</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">PyModuleDef_HEAD_INIT</span><span class="p">,</span>
+    <span class="s">"myadd"</span><span class="p">,</span>
+    <span class="s">"Python interface for the myadd C library function"</span><span class="p">,</span>
+    <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">myaddMethods</span>
+<span class="p">};</span>
+
+<span class="n">PyMODINIT_FUNC</span> <span class="nf">PyInit_myadd</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">PyModule_Create</span><span class="p">(</span><span class="o">&amp;</span><span class="n">myaddmodule</span><span class="p">);</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>Write the python we’d want to use that calls the C++</p>
+
+<figure class="highlight"><pre><code class="language-shell_session" data-lang="shell_session"><span class="gp">(myadd) $</span><span class="w"> </span>vim myscript.py</code></pre></figure>
+
+<p>Inside <code class="language-plaintext highlighter-rouge">myscript.py</code>, I write very simple code that imports <code class="language-plaintext highlighter-rouge">myadd</code> and uses it to add 5 and 6 together.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">myadd</span>
+
+<span class="k">print</span><span class="p">(</span><span class="s">"going to ADD SOME NUMBERS"</span><span class="p">)</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">myadd</span><span class="p">.</span><span class="n">myadd</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">)</span>
+
+<span class="k">print</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></code></pre></figure>
+
+<p>Write the setup script.</p>
+
+<figure class="highlight"><pre><code class="language-shell_session" data-lang="shell_session"><span class="gp">(myadd) $</span><span class="w"> </span>vim setup.py</code></pre></figure>
+
+<p>Inside <code class="language-plaintext highlighter-rouge">setup.py</code>:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">distutils.core</span> <span class="kn">import</span> <span class="n">setup</span><span class="p">,</span> <span class="n">Extension</span>
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">setup</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">"myadd"</span><span class="p">,</span>
+          <span class="n">version</span><span class="o">=</span><span class="s">"1.0.0"</span><span class="p">,</span>
+          <span class="n">description</span><span class="o">=</span><span class="s">"Python interface for the myadd C library function"</span><span class="p">,</span>
+          <span class="n">author</span><span class="o">=</span><span class="s">"Nadiah"</span><span class="p">,</span>
+          <span class="n">author_email</span><span class="o">=</span><span class="s">"nadiah@nadiah.org"</span><span class="p">,</span>
+          <span class="n">ext_modules</span><span class="o">=</span><span class="p">[</span><span class="n">Extension</span><span class="p">(</span><span class="s">"myadd"</span><span class="p">,</span> <span class="p">[</span><span class="s">"myadd.cpp"</span><span class="p">])],</span>
+          <span class="p">)</span>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">"__main__"</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span></code></pre></figure>
+
+<p>Run the setup script.</p>
+
+<figure class="highlight"><pre><code class="language-shell_session" data-lang="shell_session"><span class="gp">(myadd) $</span><span class="w"> </span>python3 setup.py <span class="nb">install</span>
+<span class="go">running install
+running build
+running build_ext...</span></code></pre></figure>
+
+<p>Now <code class="language-plaintext highlighter-rouge">myadd</code> is available as a module in this virtual environment.
+We can check that it works by running the script.</p>
+
+<figure class="highlight"><pre><code class="language-shell_session" data-lang="shell_session"><span class="gp">(myadd) $</span><span class="w"> </span>python myscript.py
+<span class="go">going to ADD SOME NUMBERS
+11</span></code></pre></figure>
+
+<h4 id="step-3-basic-setup-of-vs-code-project">Step 3: Basic setup of VS Code project</h4>
+
+<p>Fire up VS Code while in the virtual environment</p>
+
+<figure class="highlight"><pre><code class="language-shell_session" data-lang="shell_session"><span class="gp">(myadd) $</span><span class="w"> </span>code .</code></pre></figure>
+
+<p>The first step is to choose the virtual environment’s Python interpreter as our default Python interpreter. Hit <code class="language-plaintext highlighter-rouge">ctrl + shift + p</code>, and choose <code class="language-plaintext highlighter-rouge">./bin/python</code> (or wherever you put your virtual environment).</p>
+
+<figure style="max-width: 700px; margin: auto;">
+    
+    <a href="./Example debugging mixed Python C++ in VS Code _ Nadiah Kristensen_files/select_python_interp.png">
+        <img style="max-height: auto; max-width: 100%;" src="./Example debugging mixed Python C++ in VS Code _ Nadiah Kristensen_files/select_python_interp.png" alt="">
+    </a>
+    
+</figure>
+
+<figure style="max-width: 700px; margin: auto; padding-bottom: 20px;">
+    
+    <a href="./Example debugging mixed Python C++ in VS Code _ Nadiah Kristensen_files/select_python_interp_2.png">
+        <img style="max-height: auto; max-width: 100%;" src="./Example debugging mixed Python C++ in VS Code _ Nadiah Kristensen_files/select_python_interp_2.png" alt="Click images to make them bigger">
+    </a>
+    
+    <figcaption><span>Click images to make them bigger</span></figcaption>
+</figure>
+
+<p>This will create the <code class="language-plaintext highlighter-rouge">settings.json</code>, which will look something like this:</p>
+
+<figure class="highlight"><pre><code class="language-json" data-lang="json"><span class="p">{</span><span class="w">
+    </span><span class="nl">"python.pythonPath"</span><span class="p">:</span><span class="w"> </span><span class="s2">"bin/python"</span><span class="w">
+</span><span class="p">}</span></code></pre></figure>
+
+<h4 id="step-4-create-launchjson">Step 4: Create <code class="language-plaintext highlighter-rouge">launch.json</code></h4>
+
+<p>The <code class="language-plaintext highlighter-rouge">launch.json</code> file is used to configure the debugger in VS Code. In this file, we need to tell VS Code that there are two ways we want to run the debugger: (1) for the Python script, on launching the file; and (2) for the C++ portion, we want to attach that to a Python debugger process that’s already going.</p>
+
+<p>The following code goes in <code class="language-plaintext highlighter-rouge">.vscode/launch.json</code>, or you can create it from within the VS Code gui by clicking on the debugger icon (the little bug) and clicking on the blue link that says “create a launch.json file”.</p>
+
+<figure class="highlight"><pre><code class="language-json" data-lang="json"><span class="p">{</span><span class="w">
+    </span><span class="nl">"version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0.2.0"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"configurations"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Python: Current File"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"python"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"request"</span><span class="p">:</span><span class="w"> </span><span class="s2">"launch"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"program"</span><span class="p">:</span><span class="w"> </span><span class="s2">"${file}"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"console"</span><span class="p">:</span><span class="w"> </span><span class="s2">"integratedTerminal"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"(gdb) Attach"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"cppdbg"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"request"</span><span class="p">:</span><span class="w"> </span><span class="s2">"attach"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"program"</span><span class="p">:</span><span class="w"> </span><span class="s2">"${workspaceRoot}/bin/python"</span><span class="p">,</span><span class="w"> </span><span class="err">/*</span><span class="w"> </span><span class="err">My</span><span class="w"> </span><span class="err">virtual</span><span class="w"> </span><span class="err">env</span><span class="w"> </span><span class="err">*/</span><span class="w">
+            </span><span class="nl">"processId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"${command:pickProcess}"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"MIMode"</span><span class="p">:</span><span class="w"> </span><span class="s2">"gdb"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"setupCommands"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+                </span><span class="p">{</span><span class="w">
+                    </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Enable pretty-printing for gdb"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"-enable-pretty-printing"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"ignoreFailures"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+                </span><span class="p">}</span><span class="w">
+            </span><span class="p">]</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span></code></pre></figure>
+
+<h4 id="step-5-run-two-debuggers-at-once">Step 5: Run two debuggers at once</h4>
+
+<p>Add a debug breakpoint in the Python script before it drops into <code class="language-plaintext highlighter-rouge">myadd()</code>, and add another one in <code class="language-plaintext highlighter-rouge">myadd.cpp</code> at the line <code class="language-plaintext highlighter-rouge">z = x+y</code>.</p>
+
+<p>First, we’ll start the Python debugger. While focused on <code class="language-plaintext highlighter-rouge">myscript.py</code>, click the debugger icon, then click on the little green right-arrow icon next to “Python: Current file”.</p>
+
+<figure style="max-width: 700px; margin: auto;">
+    
+    <a href="./Example debugging mixed Python C++ in VS Code _ Nadiah Kristensen_files/Debugger_python-1.png">
+        <img style="max-height: auto; max-width: 100%;" src="./Example debugging mixed Python C++ in VS Code _ Nadiah Kristensen_files/Debugger_python-1.png" alt="">
+    </a>
+    
+</figure>
+
+<p>The debugger will work through <code class="language-plaintext highlighter-rouge">myscript.py</code> and stop at the first breakpoint.</p>
+
+<figure style="max-width: 700px; margin: auto;">
+    
+    <a href="./Example debugging mixed Python C++ in VS Code _ Nadiah Kristensen_files/Debugger_python_2.png">
+        <img style="max-height: auto; max-width: 100%;" src="./Example debugging mixed Python C++ in VS Code _ Nadiah Kristensen_files/Debugger_python_2.png" alt="">
+    </a>
+    
+</figure>
+
+<p>While the debugger is paused, we will need to start the second debugger and attach it to the Python debugger process.</p>
+
+<p>First we identify the Python process. Open a new terminal, run <code class="language-plaintext highlighter-rouge">ps aux | grep python</code>, and look for the process that has the token. In my case, it’s process number 4482.</p>
+
+<figure style="max-width: 700px; margin: auto;">
+    
+    <a href="./Example debugging mixed Python C++ in VS Code _ Nadiah Kristensen_files/ps_aux_new.png">
+        <img style="max-height: auto; max-width: 100%;" src="./Example debugging mixed Python C++ in VS Code _ Nadiah Kristensen_files/ps_aux_new.png" alt="">
+    </a>
+    
+</figure>
+
+<p>Go back to VS Code, and focus on the file <code class="language-plaintext highlighter-rouge">myadd.cpp</code>. Now use the drop-down to choose “(gdb) Attach”, then click the green play button.</p>
+
+<figure style="max-width: 700px; margin: auto;">
+    
+    <a href="./Example debugging mixed Python C++ in VS Code _ Nadiah Kristensen_files/Debugger_attach_new.png">
+        <img style="max-height: auto; max-width: 100%;" src="./Example debugging mixed Python C++ in VS Code _ Nadiah Kristensen_files/Debugger_attach_new.png" alt="">
+    </a>
+    
+</figure>
+
+<p>The debugger will then ask you to choose which process to attach the debugger to. Type in the process number from before, and it will find the Python process.</p>
+
+<p>[note: <a href="https://stackoverflow.com/questions/64832766/debugging-mixed-python-c-in-vs-code-cant-enter-sudo-password">a Stackoverflow question about issues at this step</a>]</p>
+
+<figure style="max-width: 700px; margin: auto;">
+    
+    <a href="./Example debugging mixed Python C++ in VS Code _ Nadiah Kristensen_files/Debugger_attach_2_new.png">
+        <img style="max-height: auto; max-width: 100%;" src="./Example debugging mixed Python C++ in VS Code _ Nadiah Kristensen_files/Debugger_attach_2_new.png" alt="">
+    </a>
+    
+</figure>
+
+<p>In the terminal, VS Code will tell you that superuser access is required to attach to a process. Type in <code class="language-plaintext highlighter-rouge">Y</code> and enter the root password.</p>
+
+<figure style="max-width: 700px; margin: auto;">
+    
+    <a href="./Example debugging mixed Python C++ in VS Code _ Nadiah Kristensen_files/superuser_prompt_new.png">
+        <img style="max-height: auto; max-width: 100%;" src="./Example debugging mixed Python C++ in VS Code _ Nadiah Kristensen_files/superuser_prompt_new.png" alt="">
+    </a>
+    
+</figure>
+
+<p>Now when you click continue in the debugging process (blue play button), the debugger will drop into the cpp file and you will be able to do the usual debugging things.</p>
+
+<figure style="max-width: 700px; margin: auto;">
+    
+    <a href="./Example debugging mixed Python C++ in VS Code _ Nadiah Kristensen_files/inside_cpp_new.png">
+        <img style="max-height: auto; max-width: 100%;" src="./Example debugging mixed Python C++ in VS Code _ Nadiah Kristensen_files/inside_cpp_new.png" alt="">
+    </a>
+    
+</figure>
+
+
+  </div>
+
+  <a class="u-url" href="https://nadiah.org/2020/03/01/example-debug-mixed-python-c-in-visual-studio-code/" hidden=""></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Nadiah Kristensen</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Nadiah Kristensen</li><li><a class="u-email" href="mailto:nadiah@nadiah.org">nadiah@nadiah.org</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><a href="https://github.com/nadiahpk"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span style="display: inline-block; padding-right: 20px;" class="username">nadiahpk</span></a><a href="https://www.twitter.com/NadiahKrist"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span style="display: inline-block; padding-right: 20px;" class="username">NadiahKrist</span></a></div>
+
+      <div class="footer-col footer-col-3">
+        <p></p>
+         
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    extensions: [
+      "MathMenu.js",
+      "MathZoom.js",
+      "AssistiveMML.js",
+      "a11y/accessibility-menu.js"
+    ],
+    jax: ["input/TeX", "output/CommonHTML"],
+    TeX: {
+      extensions: [
+        "AMSmath.js",
+        "AMSsymbols.js",
+        "noErrors.js",
+        "noUndefined.js",
+      ]
+    }
+  });
+  MathJax.Hub.Register.StartupHook("TeX Jax Ready",function () {
+    var TEX = MathJax.InputJax.TeX;
+    var COLS = function (W) {
+      var WW = [];
+      for (var i = 0, m = W.length; i < m; i++)
+        {WW[i] = TEX.Parse.prototype.Em(W[i])}
+      return WW.join(" ");
+    };
+    TEX.Definitions.Add({
+      environment: {
+        psmallmatrix: ['Array',null,'(',')','c',COLS([1/3]),".2em",'S',1],
+      }
+    });
+  });
+</script>
+<script src="./Example debugging mixed Python C++ in VS Code _ Nadiah Kristensen_files/polyfill.min.js"></script>
+<script id="MathJax-script" async="" src="./Example debugging mixed Python C++ in VS Code _ Nadiah Kristensen_files/tex-mml-chtml.js"></script>
+
+
+  
+
+
+</body></html>

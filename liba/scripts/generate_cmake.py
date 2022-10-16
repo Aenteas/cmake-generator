@@ -7,6 +7,7 @@ import textwrap
 import traceback
 import argparse
 import shutil
+import subprocess
 
 argparser = argparse.ArgumentParser()
 
@@ -113,7 +114,8 @@ def add_to_build_info(prefix, install):
     these macros can be included to other source files to access build information
     """
     str_install = "_install" if install else ""
-    os.makedirs(os.path.join(cmake_root, "build", "include"), exist_ok=True)
+    os.umask(0)
+    os.makedirs(os.path.join(cmake_root, "build", "include"), mode=0o777, exist_ok=True)
     location = os.path.join(cmake_root, "build", "include", f"build_info{str_install}.h.in")
     # C++ comment with //
     content = ""
@@ -552,7 +554,7 @@ def create_top_cmakelists():
 
     # call python script
     execute_process(
-    COMMAND sudo python3 ${{OPTION_PY_OUT}}
+    COMMAND python3 ${{OPTION_PY_OUT}}
     OUTPUT_STRIP_TRAILING_WHITESPACE
     OUTPUT_VARIABLE OPTIONS
     RESULT_VARIABLE EXIT_STATUS)
@@ -691,7 +693,7 @@ def create_top_cmakelists():
       # you can use it by running cmake --build build --target install-python
       add_custom_target(install-python
       DEPENDS ${{SWIG_TARGETS}}
-      COMMAND sudo python3 ${{INSTALL_PY_OUT}} install)
+      COMMAND python3 ${{INSTALL_PY_OUT}} install)
 
       """))
 

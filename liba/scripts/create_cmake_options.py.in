@@ -108,7 +108,9 @@ def create_cmake_config(lib_dirs):
         f.write(content)
 
     # build info for python
-    os.makedirs(os.path.join(cmake_root, "build", "python", "@PROJECT_NAME@_build"), exist_ok=True)
+    # provide writing permission for the build folder
+    os.umask(0)
+    os.makedirs(os.path.join(cmake_root, "build", "python", "@PROJECT_NAME@_build"), mode=0o777, exist_ok=True)
     with open(os.path.join(cmake_root, "build", "python", "@PROJECT_NAME@_build", "info.py"), 'w') as f:
         content = ""
         for lib_dir in lib_dirs:

@@ -1,0 +1,8 @@
+{
+    "cmake.cmakePath": "/snap/cmake/current/bin/cmake",
+    "cmake.sourceDirectory": "${workspaceFolder}/liba",
+    "cmake.buildDirectory": "${workspaceFolder}/liba/build",
+    "cmake.configureArgs": [
+        "-DFORCE_NO_BUILD:STRING=B"
+    ]
+}
