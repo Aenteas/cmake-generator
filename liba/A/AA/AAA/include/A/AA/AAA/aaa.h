@@ -5,6 +5,8 @@
     #include "B/BA/ba.h"
 #endif
 
+double mySqrt(double n);
+
 struct AAA{
     static void print();
 

@@ -1,7 +1,13 @@
 #include "aaa.h"
 
 #include <iostream>
+#include <math.h>
+
 using namespace std;
+
+double mySqrt(double n){
+    return sqrt(n);
+}
 
 void AAA::print(){
     cout << "AAA" << endl;

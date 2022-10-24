@@ -4,5 +4,8 @@
     "cmake.buildDirectory": "${workspaceFolder}/liba/build",
     "cmake.configureArgs": [
         "-DFORCE_NO_BUILD:STRING=B"
-    ]
+    ],
+    "files.associations": {
+        "cmath": "cpp"
+    }
 }

@@ -1,8 +1,9 @@
 # extra libraries to link. For example math.h is inside libm, so we need to link it from CMake: 
 # target_link_libraries(<target> "m")
 # I have not figured out a way to automize it
-# list extra libs here. Format is <include path> <CMake library target>
+# list extra libs here. Format is <include path> <CMake library targets ...>
 math.h m
 QColor Qt5::Gui
 QFrame Qt5::Widgets
 QTime Qt5::Core
+gtest/gtest.h gtest pthread

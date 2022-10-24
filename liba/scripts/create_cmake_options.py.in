@@ -30,6 +30,10 @@ def get_lib_dirs():
         lib_dirs.extend([os.path.relpath(path, cmake_root)[:-8] 
         for path in glob.glob(os.path.join(cmake_root, dir, "**", "include"), recursive=True)
         if not os.path.sep + "external" + os.path.sep in path])
+    for dir in subdirs:
+        lib_dirs.extend([os.path.relpath(path, cmake_root)[:-5] 
+        for path in glob.glob(os.path.join(cmake_root, dir, "**", "apps"), recursive=True)
+        if not os.path.sep + "external" + os.path.sep in path and not os.path.relpath(path, cmake_root)[:-5] in lib_dirs])
     return lib_dirs
 
 option_dict = {}
